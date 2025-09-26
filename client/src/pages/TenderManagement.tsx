@@ -7,7 +7,7 @@ import TenderForm from '@/components/TenderForm';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Edit, Eye, Calendar, AlertCircle } from 'lucide-react';
+import { CreditCard as Edit, Eye, Calendar, CircleAlert as AlertCircle } from 'lucide-react';
 import type { Tender, InsertTender } from '@shared/schema';
 
 // todo: remove mock functionality

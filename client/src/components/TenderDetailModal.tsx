@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
-import { X, Calendar, Clock, Building, FileText, AlertCircle, Edit3 } from 'lucide-react';
+import { X, Calendar, Clock, Building, FileText, CircleAlert as AlertCircle, CreditCard as Edit3 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
