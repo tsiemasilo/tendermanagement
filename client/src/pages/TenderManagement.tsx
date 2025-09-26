@@ -19,6 +19,7 @@ const mockTenders: Tender[] = [
     description: 'Road Infrastructure Development Project including bridge repairs and traffic management system upgrades',
     briefingDate: new Date('2025-01-15T10:00:00Z'),
     submissionDate: new Date('2025-01-30T17:00:00Z'),
+    venue: 'City Hall Conference Room A, 12 Hertzog Boulevard, Cape Town',
     compulsoryBriefing: true,
   },
   {
@@ -28,6 +29,7 @@ const mockTenders: Tender[] = [
     description: 'Medical Equipment Supply Contract for provincial hospitals',
     briefingDate: new Date('2025-01-20T14:00:00Z'),
     submissionDate: new Date('2025-02-05T12:00:00Z'),
+    venue: 'Provincial Health Building, Boardroom 3, Wale Street, Cape Town',
     compulsoryBriefing: false,
   },
   {
@@ -37,6 +39,7 @@ const mockTenders: Tender[] = [
     description: 'IT Services and Support for government departments',
     briefingDate: new Date('2025-01-25T09:00:00Z'),
     submissionDate: new Date('2025-02-10T16:00:00Z'),
+    venue: 'Provincial Government Building, Meeting Room 201, 4 Dorp Street, Cape Town',
     compulsoryBriefing: true,
   },
   {
@@ -46,6 +49,7 @@ const mockTenders: Tender[] = [
     description: 'Campus Security Services Contract',
     briefingDate: new Date('2025-01-18T11:00:00Z'),
     submissionDate: new Date('2025-02-01T15:00:00Z'),
+    venue: 'UCT Administration Building, Senate Room, Upper Campus, Rondebosch',
     compulsoryBriefing: false,
   },
 ];

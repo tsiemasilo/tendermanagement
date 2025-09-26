@@ -10,6 +10,7 @@ const mockTender: Tender = {
   description: 'Road infrastructure development project',
   briefingDate: new Date('2025-01-15T10:00:00Z'),
   submissionDate: new Date('2025-01-30T17:00:00Z'),
+  venue: 'City Hall Conference Room A, 12 Hertzog Boulevard, Cape Town',
   compulsoryBriefing: true,
 };
 

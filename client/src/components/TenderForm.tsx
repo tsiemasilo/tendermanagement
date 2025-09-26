@@ -44,6 +44,7 @@ export default function TenderForm({
       description: tender?.description || '',
       briefingDate: tender ? new Date(tender.briefingDate) : new Date(),
       submissionDate: tender ? new Date(tender.submissionDate) : new Date(),
+      venue: tender?.venue || '',
       compulsoryBriefing: tender?.compulsoryBriefing || false,
     },
   });
@@ -207,6 +208,24 @@ export default function TenderForm({
                   )}
                 />
               </div>
+
+              <FormField
+                control={form.control}
+                name="venue"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Venue Location</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="e.g., City Hall Conference Room A, 123 Main Street, Cape Town"
+                        {...field}
+                        data-testid="input-venue"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
 
             {/* Briefing Requirements */}

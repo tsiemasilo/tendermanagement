@@ -16,6 +16,7 @@ export const tenders = pgTable("tenders", {
   description: text("description").notNull(),
   briefingDate: timestamp("briefing_date").notNull(),
   submissionDate: timestamp("submission_date").notNull(),
+  venue: text("venue").notNull(),
   compulsoryBriefing: boolean("compulsory_briefing").notNull().default(false),
 });
 
