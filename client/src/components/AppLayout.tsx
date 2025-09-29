@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, Calendar, List, Settings, Download, HelpCircle, Info } from 'lucide-react';
+import * as XLSX from 'xlsx';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
@@ -39,9 +40,54 @@ export default function AppLayout({
   const [showAbout, setShowAbout] = useState(false);
   
   // Preferences state
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('darkMode') === 'true' || document.documentElement.classList.contains('dark');
+    }
+    return false;
+  });
   const [notifications, setNotifications] = useState(true);
   const [autoSave, setAutoSave] = useState(true);
+
+  // Apply dark mode effect
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('darkMode', 'true');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('darkMode', 'false');
+    }
+  }, [darkMode]);
+
+  // Keyboard shortcuts effect
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Ctrl+N for New Tender
+      if (event.ctrlKey && event.key === 'n' && !event.altKey && !event.shiftKey) {
+        event.preventDefault();
+        onNewTender?.();
+      }
+      // Ctrl+E for Export Data
+      else if (event.ctrlKey && event.key === 'e' && !event.altKey && !event.shiftKey) {
+        event.preventDefault();
+        handleExportData();
+      }
+      // Tab to cycle views
+      else if (event.key === 'Tab' && !event.ctrlKey && !event.altKey && !event.shiftKey && onViewChange) {
+        // Only if we're not in an input field
+        const activeElement = document.activeElement;
+        if (!activeElement || (activeElement.tagName !== 'INPUT' && activeElement.tagName !== 'TEXTAREA' && !activeElement.isContentEditable)) {
+          event.preventDefault();
+          const newView = currentView === 'calendar' ? 'list' : 'calendar';
+          onViewChange(newView);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onNewTender, onViewChange, currentView]);
 
   const handleExportData = async () => {
     try {
@@ -49,31 +95,46 @@ export default function AppLayout({
       const response = await fetch('/api/tenders');
       const tenders = await response.json();
 
-      const dataStr = JSON.stringify(tenders, null, 2);
-      const dataBlob = new Blob([dataStr], { type: 'application/json' });
-      const url = URL.createObjectURL(dataBlob);
+      // Convert data to Excel format
+      const exportData = tenders.map((tender: any) => ({
+        'Tender Number': tender.tenderNumber,
+        'Client Name': tender.clientName,
+        'Description': tender.description,
+        'Briefing Date': new Date(tender.briefingDate).toLocaleDateString(),
+        'Submission Date': new Date(tender.submissionDate).toLocaleDateString(),
+        'Venue': tender.venue,
+        'Compulsory Briefing': tender.compulsoryBriefing ? 'Yes' : 'No',
+      }));
+
+      // Create workbook and worksheet
+      const workbook = XLSX.utils.book_new();
+      const worksheet = XLSX.utils.json_to_sheet(exportData);
       
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `tender-data-${new Date().toISOString().split('T')[0]}.json`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      // Auto-size columns
+      const columnWidths = [
+        { wch: 15 }, // Tender Number
+        { wch: 25 }, // Client Name  
+        { wch: 40 }, // Description
+        { wch: 15 }, // Briefing Date
+        { wch: 15 }, // Submission Date
+        { wch: 30 }, // Venue
+        { wch: 18 }, // Compulsory Briefing
+      ];
+      worksheet['!cols'] = columnWidths;
+      
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Tenders');
+      
+      // Export to Excel file
+      const fileName = `tender-data-${new Date().toISOString().split('T')[0]}.xlsx`;
+      XLSX.writeFile(workbook, fileName);
     } catch (error) {
       console.error('Failed to export data:', error);
-      // Fallback to empty array if API fails
-      const dataStr = JSON.stringify([], null, 2);
-      const dataBlob = new Blob([dataStr], { type: 'application/json' });
-      const url = URL.createObjectURL(dataBlob);
-      
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `tender-data-${new Date().toISOString().split('T')[0]}.json`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      // Fallback to empty Excel file if API fails
+      const workbook = XLSX.utils.book_new();
+      const worksheet = XLSX.utils.json_to_sheet([]);
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Tenders');
+      const fileName = `tender-data-${new Date().toISOString().split('T')[0]}.xlsx`;
+      XLSX.writeFile(workbook, fileName);
     }
   };
   return (
