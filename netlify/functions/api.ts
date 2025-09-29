@@ -125,7 +125,7 @@ app.use((req, res, next) => {
 });
 
 // API Routes
-router.get("/users/:id", async (req: Request, res: Response) => {
+router.get("/api/users/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const user = await storage.getUser(id);
@@ -141,7 +141,7 @@ router.get("/users/:id", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/users", async (req: Request, res: Response) => {
+router.get("/api/users", async (req: Request, res: Response) => {
   try {
     // For demo purposes, return empty array as MemStorage doesn't have a getAll method
     res.json([]);
@@ -151,7 +151,7 @@ router.get("/users", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/users", async (req: Request, res: Response) => {
+router.post("/api/users", async (req: Request, res: Response) => {
   try {
     const userData = req.body;
     const user = await storage.createUser(userData);
@@ -162,7 +162,7 @@ router.post("/users", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/users/username/:username", async (req: Request, res: Response) => {
+router.get("/api/users/username/:username", async (req: Request, res: Response) => {
   try {
     const { username } = req.params;
     const user = await storage.getUserByUsername(username);
@@ -179,7 +179,7 @@ router.get("/users/username/:username", async (req: Request, res: Response) => {
 });
 
 // Tender routes
-router.get("/tenders", async (req: Request, res: Response) => {
+router.get("/api/tenders", async (req: Request, res: Response) => {
   try {
     const allTenders = await storage.getAllTenders();
     res.json(allTenders);
@@ -189,7 +189,7 @@ router.get("/tenders", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/tenders/:id", async (req: Request, res: Response) => {
+router.get("/api/tenders/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const tender = await storage.getTender(id);
@@ -205,7 +205,7 @@ router.get("/tenders/:id", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/tenders", async (req: Request, res: Response) => {
+router.post("/api/tenders", async (req: Request, res: Response) => {
   try {
     const tenderData = insertTenderSchema.parse(req.body);
     const tender = await storage.createTender(tenderData);
@@ -219,7 +219,7 @@ router.post("/tenders", async (req: Request, res: Response) => {
   }
 });
 
-router.put("/tenders/:id", async (req: Request, res: Response) => {
+router.put("/api/tenders/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const tenderData = insertTenderSchema.parse(req.body);
@@ -234,7 +234,7 @@ router.put("/tenders/:id", async (req: Request, res: Response) => {
   }
 });
 
-router.delete("/tenders/:id", async (req: Request, res: Response) => {
+router.delete("/api/tenders/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     await storage.deleteTender(id);
@@ -246,12 +246,12 @@ router.delete("/tenders/:id", async (req: Request, res: Response) => {
 });
 
 // Health check endpoint
-router.get("/health", (req: Request, res: Response) => {
+router.get("/api/health", (req: Request, res: Response) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
-// Mount the router
-app.use("/.netlify/functions/api", router);
+// Mount the router at root so /api routes work correctly
+app.use("/", router);
 
 // Error handling middleware
 app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
