@@ -1,9 +1,79 @@
 import express, { type Request, Response, NextFunction } from "express";
 import serverless from "serverless-http";
-import { storage } from "../../server/storage";
+import { drizzle } from "drizzle-orm/neon-http";
+import { neon } from "@neondatabase/serverless";
+import { eq } from "drizzle-orm";
 import { z } from "zod";
-import { insertTenderSchema, insertUserSchema } from "../../shared/schema";
+import { insertTenderSchema, insertUserSchema, users, tenders, type User, type InsertUser, type Tender, type InsertTender } from "../../shared/schema";
 import { randomUUID } from "crypto";
+
+// Database connection for Netlify serverless functions
+const getDatabaseUrl = () => {
+  // For Netlify, always use NETLIFY_DATABASE_URL, fallback to DATABASE_URL
+  const databaseUrl = process.env.NETLIFY_DATABASE_URL || process.env.DATABASE_URL;
+  
+  if (!databaseUrl) {
+    throw new Error('Missing database connection string. Please set NETLIFY_DATABASE_URL or DATABASE_URL environment variable.');
+  }
+  
+  return databaseUrl;
+};
+
+const sql = neon(getDatabaseUrl());
+const db = drizzle(sql);
+
+// Storage implementation for serverless functions
+class NetlifyStorage {
+  // User operations
+  async getUser(id: string): Promise<User | undefined> {
+    const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
+    return result[0];
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const result = await db.select().from(users).where(eq(users.username, username)).limit(1);
+    return result[0];
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const result = await db.insert(users).values(insertUser).returning();
+    return result[0];
+  }
+
+  // Tender operations
+  async getTender(id: string): Promise<Tender | undefined> {
+    const result = await db.select().from(tenders).where(eq(tenders.id, id)).limit(1);
+    return result[0];
+  }
+
+  async getAllTenders(): Promise<Tender[]> {
+    return db.select().from(tenders).orderBy(tenders.submissionDate);
+  }
+
+  async createTender(insertTender: InsertTender): Promise<Tender> {
+    const result = await db.insert(tenders).values(insertTender).returning();
+    return result[0];
+  }
+
+  async updateTender(id: string, updateData: Partial<InsertTender>): Promise<Tender> {
+    const result = await db.update(tenders)
+      .set(updateData)
+      .where(eq(tenders.id, id))
+      .returning();
+    
+    if (!result[0]) {
+      throw new Error(`Tender with id ${id} not found`);
+    }
+    
+    return result[0];
+  }
+
+  async deleteTender(id: string): Promise<void> {
+    await db.delete(tenders).where(eq(tenders.id, id));
+  }
+}
+
+const storage = new NetlifyStorage();
 
 const app = express();
 const router = express.Router();

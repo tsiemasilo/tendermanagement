@@ -5,6 +5,11 @@
 
 [functions]
   external_node_modules = ["express", "drizzle-orm", "@neondatabase/serverless", "tsx"]
+  # Include environment variables for functions
+  included_files = ["shared/**"]
+
+[context.production.environment]
+  NODE_ENV = "production"
 
 [[redirects]]
   from = "/api/*"
