@@ -1,0 +1,116 @@
+9:36:22 AM: build-image version: e8c4c0b200e9701a8a8825b9ff63ea7e9f1740e2 (noble)
+9:36:22 AM: buildbot version: a8227f684d13e2f14c4dff2ff89b1b5fbedbc9d9
+9:36:23 AM: Fetching cached dependencies
+9:36:23 AM: Starting to download cache of 402.0MB (Last modified: 2025-09-29 07:31:29 +0000 UTC)
+9:36:24 AM: Finished downloading cache in 1.305s
+9:36:24 AM: Starting to extract cache
+9:36:29 AM: Finished extracting cache in 5.248s
+9:36:29 AM: Finished fetching cache in 6.623s
+9:36:29 AM: Starting to prepare the repo for build
+9:36:29 AM: Preparing Git Reference refs/heads/main
+9:36:31 AM: Starting to install dependencies
+9:36:31 AM: Started restoring cached python cache
+9:36:31 AM: Finished restoring cached python cache
+9:36:31 AM: Started restoring cached ruby cache
+9:36:31 AM: Finished restoring cached ruby cache
+9:36:31 AM: Started restoring cached go cache
+9:36:32 AM: Finished restoring cached go cache
+9:36:32 AM: Started restoring cached Node.js version
+9:36:32 AM: Finished restoring cached Node.js version
+9:36:33 AM: v22.20.0 is already installed.
+9:36:33 AM: Now using node v22.20.0 (npm v10.9.3)
+9:36:33 AM: Enabling Node.js Corepack
+9:36:33 AM: Started restoring cached build plugins
+9:36:33 AM: Finished restoring cached build plugins
+9:36:33 AM: WARNING: The environment variable 'NODE_ENV' is set to 'production'. Any 'devDependencies' in package.json will not be installed
+9:36:33 AM: Started restoring cached corepack dependencies
+9:36:33 AM: Finished restoring cached corepack dependencies
+9:36:33 AM: No npm workspaces detected
+9:36:33 AM: Started restoring cached node modules
+9:36:33 AM: Finished restoring cached node modules
+9:36:33 AM: Installing npm packages using npm version 10.9.3
+9:36:35 AM: changed 1 package in 2s
+9:36:35 AM: npm packages installed
+9:36:35 AM: Successfully installed dependencies
+9:36:35 AM: Starting build script
+9:36:36 AM: Detected 1 framework(s)
+9:36:36 AM: "vite" at version "5.4.19"
+9:36:36 AM: Section completed: initializing
+9:36:37 AM: ​
+9:36:37 AM: Netlify Build                                                 
+9:36:37 AM: ────────────────────────────────────────────────────────────────
+9:36:37 AM: ​
+9:36:37 AM: ❯ Version
+9:36:37 AM:   @netlify/build 35.1.8
+9:36:37 AM: ​
+9:36:37 AM: ❯ Flags
+9:36:37 AM:   accountId: 6786aa5b927658b4b62b93d6
+9:36:37 AM:   baseRelDir: true
+9:36:37 AM:   buildId: 68da36b30750cb00085c92d3
+9:36:37 AM:   deployId: 68da36b30750cb00085c92d5
+9:36:37 AM: ​
+9:36:37 AM: ❯ Current directory
+9:36:37 AM:   /opt/build/repo
+9:36:37 AM: ​
+9:36:37 AM: ❯ Config file
+9:36:37 AM:   /opt/build/repo/netlify.toml
+9:36:37 AM: ​
+9:36:37 AM: ❯ Context
+9:36:37 AM:   production
+9:36:37 AM: ​
+9:36:37 AM: ❯ Installing extensions
+9:36:37 AM:    - neon
+9:36:38 AM: ​
+9:36:38 AM: ❯ Loading extensions
+9:36:38 AM:    - neon
+9:36:39 AM: Failed during stage 'building site': Build script returned non-zero exit code: 2 (https://ntl.fyi/exit-code-2)
+9:36:39 AM: ​
+9:36:39 AM: build.command from netlify.toml                               
+9:36:39 AM: ────────────────────────────────────────────────────────────────
+9:36:39 AM: ​
+9:36:39 AM: $ npm run build
+9:36:39 AM: > rest-express@1.0.0 build
+9:36:39 AM: > vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+9:36:39 AM: sh: 1: vite: not found
+9:36:39 AM: ​
+9:36:39 AM: "build.command" failed                                        
+9:36:39 AM: ────────────────────────────────────────────────────────────────
+9:36:39 AM: ​
+9:36:39 AM:   Error message
+9:36:39 AM:   Command failed with exit code 127: npm run build (https://ntl.fyi/exit-code-127)
+9:36:39 AM: ​
+9:36:39 AM:   Error location
+9:36:39 AM:   In build.command from netlify.toml:
+9:36:39 AM:   npm run build
+9:36:39 AM: ​
+9:36:39 AM:   Resolved config
+9:36:39 AM:   build:
+9:36:39 AM:     command: npm run build
+9:36:39 AM:     commandOrigin: config
+9:36:39 AM:     environment:
+9:36:39 AM:       - NETLIFY_DATABASE_URL
+9:36:39 AM:       - NETLIFY_DATABASE_URL_UNPOOLED
+9:36:39 AM:       - NODE_ENV
+9:36:39 AM:     publish: /opt/build/repo/dist/public
+9:36:39 AM:     publishOrigin: config
+9:36:39 AM:   functions:
+9:36:39 AM:     "*":
+9:36:39 AM:       external_node_modules:
+9:36:39 AM:         - express
+9:36:39 AM:         - drizzle-orm
+9:36:39 AM:         - "@neondatabase/serverless"
+9:36:39 AM:         - tsx
+9:36:39 AM:       included_files:
+9:36:39 AM:         - shared/**
+  functionsDirectory: /opt/build/repo/netlify/functions
+  redirects:
+    - from: /api/*
+      status: 200
+      to: /.netlify/functions/api/:splat
+    - from: /*
+      status: 200
+      to: /index.html
+  redirectsOrigin: config
+9:36:39 AM: Build failed due to a user error: Build script returned non-zero exit code: 2
+9:36:39 AM: Failing build: Failed to build site
+9:36:40 AM: Finished processing build request in 17.242s
