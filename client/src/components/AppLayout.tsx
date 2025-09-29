@@ -2,6 +2,13 @@ import { useState } from 'react';
 import { Plus, Calendar, List, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
 import alteramLogo from '@assets/alteram1_1_600x197_1750838676214_1758878160686.png';
 
 interface AppLayoutProps {
@@ -79,9 +86,28 @@ export default function AppLayout({
                 New Tender
               </Button>
               
-              <Button variant="outline" size="icon">
-                <Settings className="h-4 w-4" />
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="icon" data-testid="button-settings">
+                    <Settings className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem data-testid="menu-item-preferences">
+                    Preferences
+                  </DropdownMenuItem>
+                  <DropdownMenuItem data-testid="menu-item-export">
+                    Export Data
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem data-testid="menu-item-help">
+                    Help & Support
+                  </DropdownMenuItem>
+                  <DropdownMenuItem data-testid="menu-item-about">
+                    About
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </div>
