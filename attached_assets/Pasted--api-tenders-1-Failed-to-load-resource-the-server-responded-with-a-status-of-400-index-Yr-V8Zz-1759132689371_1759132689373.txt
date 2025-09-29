@@ -1,0 +1,24 @@
+/api/tenders:1  Failed to load resource: the server responded with a status of 400 ()
+index-Yr_V8ZzH.js:207 Error submitting tender: Error: 400: {"message":"Validation error","errors":[{"code":"invalid_type","expected":"date","received":"string","path":["briefingDate"],"message":"Expected date, received string"},{"code":"invalid_type","expected":"date","received":"string","path":["submissionDate"],"message":"Expected date, received string"}]}
+    at bS (index-Yr_V8ZzH.js:48:42720)
+    at async Dv (index-Yr_V8ZzH.js:48:42921)
+    at async Object.mutationFn (index-Yr_V8ZzH.js:207:197509)
+x @ index-Yr_V8ZzH.js:207
+/api/tenders:1  Failed to load resource: the server responded with a status of 400 ()
+index-Yr_V8ZzH.js:207 Error submitting tender: Error: 400: {"message":"Validation error","errors":[{"code":"invalid_type","expected":"date","received":"string","path":["briefingDate"],"message":"Expected date, received string"},{"code":"invalid_type","expected":"date","received":"string","path":["submissionDate"],"message":"Expected date, received string"}]}
+    at bS (index-Yr_V8ZzH.js:48:42720)
+    at async Dv (index-Yr_V8ZzH.js:48:42921)
+    at async Object.mutationFn (index-Yr_V8ZzH.js:207:197509)
+x @ index-Yr_V8ZzH.js:207
+/api/tenders:1  Failed to load resource: the server responded with a status of 400 ()
+index-Yr_V8ZzH.js:207 Error submitting tender: Error: 400: {"message":"Validation error","errors":[{"code":"invalid_type","expected":"date","received":"string","path":["briefingDate"],"message":"Expected date, received string"},{"code":"invalid_type","expected":"date","received":"string","path":["submissionDate"],"message":"Expected date, received string"}]}
+    at bS (index-Yr_V8ZzH.js:48:42720)
+    at async Dv (index-Yr_V8ZzH.js:48:42921)
+    at async Object.mutationFn (index-Yr_V8ZzH.js:207:197509)
+x @ index-Yr_V8ZzH.js:207
+/api/tenders:1  Failed to load resource: the server responded with a status of 400 ()
+index-Yr_V8ZzH.js:207 Error submitting tender: Error: 400: {"message":"Validation error","errors":[{"code":"invalid_type","expected":"date","received":"string","path":["briefingDate"],"message":"Expected date, received string"},{"code":"invalid_type","expected":"date","received":"string","path":["submissionDate"],"message":"Expected date, received string"}]}
+    at bS (index-Yr_V8ZzH.js:48:42720)
+    at async Dv (index-Yr_V8ZzH.js:48:42921)
+    at async Object.mutationFn (index-Yr_V8ZzH.js:207:197509)
+x @ index-Yr_V8ZzH.js:207

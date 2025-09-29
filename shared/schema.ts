@@ -27,6 +27,9 @@ export const insertUserSchema = createInsertSchema(users).pick({
 
 export const insertTenderSchema = createInsertSchema(tenders).omit({
   id: true,
+}).extend({
+  briefingDate: z.coerce.date(),
+  submissionDate: z.coerce.date(),
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
