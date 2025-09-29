@@ -43,32 +43,38 @@ export default function AppLayout({
   const [notifications, setNotifications] = useState(true);
   const [autoSave, setAutoSave] = useState(true);
 
-  const handleExportData = () => {
-    // Get current tenders data - in a real app this would come from your state/API
-    const mockTenders = [
-      {
-        id: '1',
-        tenderNumber: 'TND-2025-001',
-        clientName: 'City of Cape Town',
-        description: 'Road Infrastructure Development Project',
-        briefingDate: '2025-01-15T10:00:00Z',
-        submissionDate: '2025-01-30T17:00:00Z',
-        venue: 'City Hall Conference Room A',
-        compulsoryBriefing: true,
-      }
-    ];
+  const handleExportData = async () => {
+    try {
+      // Fetch current tenders data from API
+      const response = await fetch('/api/tenders');
+      const tenders = await response.json();
 
-    const dataStr = JSON.stringify(mockTenders, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `tender-data-${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+      const dataStr = JSON.stringify(tenders, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(dataBlob);
+      
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `tender-data-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Failed to export data:', error);
+      // Fallback to empty array if API fails
+      const dataStr = JSON.stringify([], null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(dataBlob);
+      
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `tender-data-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
   };
   return (
     <div className="min-h-screen bg-background relative">

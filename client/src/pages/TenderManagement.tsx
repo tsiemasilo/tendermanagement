@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { apiRequest, queryClient } from '@/lib/queryClient';
 import AppLayout from '@/components/AppLayout';
 import TenderCalendar from '@/components/TenderCalendar';
 import TenderDetailModal from '@/components/TenderDetailModal';
@@ -10,50 +12,6 @@ import { Button } from '@/components/ui/button';
 import { CreditCard as Edit, Eye, Calendar, CircleAlert as AlertCircle } from 'lucide-react';
 import type { Tender, InsertTender } from '@shared/schema';
 
-// todo: remove mock functionality
-const mockTenders: Tender[] = [
-  {
-    id: '1',
-    tenderNumber: 'TND-2025-001',
-    clientName: 'City of Cape Town',
-    description: 'Road Infrastructure Development Project including bridge repairs and traffic management system upgrades',
-    briefingDate: new Date('2025-01-15T10:00:00Z'),
-    submissionDate: new Date('2025-01-30T17:00:00Z'),
-    venue: 'City Hall Conference Room A, 12 Hertzog Boulevard, Cape Town',
-    compulsoryBriefing: true,
-  },
-  {
-    id: '2',
-    tenderNumber: 'TND-2025-002',
-    clientName: 'Department of Health',
-    description: 'Medical Equipment Supply Contract for provincial hospitals',
-    briefingDate: new Date('2025-01-20T14:00:00Z'),
-    submissionDate: new Date('2025-02-05T12:00:00Z'),
-    venue: 'Provincial Health Building, Boardroom 3, Wale Street, Cape Town',
-    compulsoryBriefing: false,
-  },
-  {
-    id: '3',
-    tenderNumber: 'TND-2025-003',
-    clientName: 'Provincial Government',
-    description: 'IT Services and Support for government departments',
-    briefingDate: new Date('2025-01-25T09:00:00Z'),
-    submissionDate: new Date('2025-02-10T16:00:00Z'),
-    venue: 'Provincial Government Building, Meeting Room 201, 4 Dorp Street, Cape Town',
-    compulsoryBriefing: true,
-  },
-  {
-    id: '4',
-    tenderNumber: 'TND-2025-004',
-    clientName: 'University of Cape Town',
-    description: 'Campus Security Services Contract',
-    briefingDate: new Date('2025-01-18T11:00:00Z'),
-    submissionDate: new Date('2025-02-01T15:00:00Z'),
-    venue: 'UCT Administration Building, Senate Room, Upper Campus, Rondebosch',
-    compulsoryBriefing: false,
-  },
-];
-
 export default function TenderManagement() {
   const [currentView, setCurrentView] = useState<'calendar' | 'list'>('calendar');
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -61,7 +19,33 @@ export default function TenderManagement() {
   const [editingTender, setEditingTender] = useState<Tender | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showForm, setShowForm] = useState(false);
-  const [tenders, setTenders] = useState<Tender[]>(mockTenders);
+
+  // Fetch tenders from API
+  const { data: tenders = [], isLoading } = useQuery<Tender[]>({
+    queryKey: ['/api/tenders'],
+  });
+
+  // Create tender mutation
+  const createTenderMutation = useMutation({
+    mutationFn: async (data: InsertTender) => {
+      const response = await apiRequest('POST', '/api/tenders', data);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/tenders'] });
+    },
+  });
+
+  // Update tender mutation
+  const updateTenderMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: InsertTender }) => {
+      const response = await apiRequest('PUT', `/api/tenders/${id}`, data);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/tenders'] });
+    },
+  });
 
   const handleNewTender = () => {
     setEditingTender(null);
@@ -80,28 +64,21 @@ export default function TenderManagement() {
   };
 
   const handleFormSubmit = async (data: InsertTender) => {
-    // todo: remove mock functionality
-    console.log('Submitting tender:', data);
-    
-    if (editingTender) {
-      // Update existing tender
-      setTenders(prev => prev.map(t => 
-        t.id === editingTender.id 
-          ? { ...editingTender, ...data }
-          : t
-      ));
-    } else {
-      // Create new tender
-      const newTender: Tender = {
-        id: Date.now().toString(),
-        ...data,
-        compulsoryBriefing: data.compulsoryBriefing ?? false,
-      };
-      setTenders(prev => [...prev, newTender]);
+    try {
+      if (editingTender) {
+        // Update existing tender
+        await updateTenderMutation.mutateAsync({ id: editingTender.id, data });
+      } else {
+        // Create new tender
+        await createTenderMutation.mutateAsync(data);
+      }
+      
+      setShowForm(false);
+      setEditingTender(null);
+    } catch (error) {
+      console.error('Error submitting tender:', error);
+      // You could show a toast notification here
     }
-    
-    setShowForm(false);
-    setEditingTender(null);
   };
 
   const getTendersForSelectedDate = () => {
@@ -131,6 +108,16 @@ export default function TenderManagement() {
       return submissionDate >= today && submissionDate <= threeDaysFromNow;
     });
   };
+
+  if (isLoading) {
+    return (
+      <AppLayout>
+        <div className="flex items-center justify-center h-64">
+          <p>Loading tenders...</p>
+        </div>
+      </AppLayout>
+    );
+  }
 
   if (showForm) {
     return (
