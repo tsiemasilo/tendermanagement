@@ -76,7 +76,7 @@ export default function AppLayout({
       // Tab to cycle views
       else if (event.key === 'Tab' && !event.ctrlKey && !event.altKey && !event.shiftKey && onViewChange) {
         // Only if we're not in an input field
-        const activeElement = document.activeElement;
+        const activeElement = document.activeElement as HTMLElement;
         if (!activeElement || (activeElement.tagName !== 'INPUT' && activeElement.tagName !== 'TEXTAREA' && !activeElement.isContentEditable)) {
           event.preventDefault();
           const newView = currentView === 'calendar' ? 'list' : 'calendar';
