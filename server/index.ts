@@ -1,10 +1,32 @@
 import express, { type Request, Response, NextFunction } from "express";
+import session from "express-session";
+import createMemoryStore from "memorystore";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+const MemoryStore = createMemoryStore(session);
+const isProduction = app.get("env") === "production";
+
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || "dev-secret-change-in-production",
+    resave: false,
+    saveUninitialized: false,
+    store: new MemoryStore({
+      checkPeriod: 86400000,
+    }),
+    cookie: {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? "strict" : "lax",
+      maxAge: 1000 * 60 * 60 * 24 * 7,
+    },
+  })
+);
 
 app.use((req, res, next) => {
   const start = Date.now();

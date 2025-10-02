@@ -7,6 +7,7 @@ export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
+  isAdmin: boolean("is_admin").notNull().default(false),
 });
 
 export const tenders = pgTable("tenders", {
@@ -23,6 +24,12 @@ export const tenders = pgTable("tenders", {
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
+  isAdmin: true,
+});
+
+export const loginSchema = z.object({
+  username: z.string().min(1, "Username is required"),
+  password: z.string().min(1, "Password is required"),
 });
 
 export const insertTenderSchema = createInsertSchema(tenders).omit({

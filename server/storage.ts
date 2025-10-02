@@ -26,7 +26,10 @@ export interface IStorage {
   // User operations
   getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
+  getAllUsers(): Promise<User[]>;
   createUser(user: InsertUser): Promise<User>;
+  updateUser(id: string, user: Partial<InsertUser>): Promise<User>;
+  deleteUser(id: string): Promise<void>;
   
   // Tender operations
   getTender(id: string): Promise<Tender | undefined>;
@@ -48,9 +51,30 @@ export class DatabaseStorage implements IStorage {
     return result[0];
   }
 
+  async getAllUsers(): Promise<User[]> {
+    return db.select().from(users);
+  }
+
   async createUser(insertUser: InsertUser): Promise<User> {
     const result = await db.insert(users).values(insertUser).returning();
     return result[0];
+  }
+
+  async updateUser(id: string, updateData: Partial<InsertUser>): Promise<User> {
+    const result = await db.update(users)
+      .set(updateData)
+      .where(eq(users.id, id))
+      .returning();
+    
+    if (!result[0]) {
+      throw new Error(`User with id ${id} not found`);
+    }
+    
+    return result[0];
+  }
+
+  async deleteUser(id: string): Promise<void> {
+    await db.delete(users).where(eq(users.id, id));
   }
 
   // Tender operations
