@@ -54,20 +54,20 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-950 flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4 relative overflow-hidden">
       {/* Background Logo */}
       <div 
-        className="fixed inset-0 bg-no-repeat bg-center opacity-10 pointer-events-none"
+        className="fixed inset-0 bg-no-repeat bg-center opacity-[0.03] pointer-events-none"
         style={{
           backgroundImage: `url(${alteramLogo})`,
-          backgroundSize: '600px auto',
+          backgroundSize: '800px auto',
           backgroundPosition: 'center',
         }}
       />
 
       {/* Login Card */}
-      <Card className="w-full max-w-md relative z-10 shadow-2xl">
-        <CardHeader className="space-y-4 text-center">
+      <Card className="w-full max-w-md relative z-10 shadow-xl">
+        <CardHeader className="space-y-4 text-center pb-6">
           <div className="flex justify-center mb-4">
             <img 
               src={alteramLogo} 
@@ -77,10 +77,10 @@ export default function Login() {
           </div>
           <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
           <CardDescription>
-            Sign in to access the Tender Management System
+            Sign in to access the Alteram CV Management System
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pb-8">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
@@ -124,7 +124,7 @@ export default function Login() {
 
               <Button 
                 type="submit" 
-                className="w-full bg-blue-900 hover:bg-blue-800"
+                className="w-full bg-orange-500 hover:bg-orange-600 text-white"
                 disabled={loginMutation.isPending}
                 data-testid="button-login"
               >
@@ -134,11 +134,6 @@ export default function Login() {
           </Form>
         </CardContent>
       </Card>
-
-      {/* Footer */}
-      <div className="fixed bottom-4 left-0 right-0 text-center text-white/60 text-sm z-10">
-        <p>© 2025 Alteram. Professional tender management solutions.</p>
-      </div>
     </div>
   );
 }
