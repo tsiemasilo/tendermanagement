@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
@@ -22,6 +23,15 @@ type LoginFormData = z.infer<typeof loginSchema>;
 export default function Login() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    };
+  }, []);
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -54,10 +64,10 @@ export default function Login() {
   };
 
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4 overflow-auto">
+    <div className="fixed inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4">
       {/* Background Logo */}
       <div 
-        className="fixed inset-0 bg-no-repeat bg-center opacity-[0.03] pointer-events-none"
+        className="fixed inset-0 bg-no-repeat bg-center opacity-[0.03] pointer-events-none z-0"
         style={{
           backgroundImage: `url(${alteramLogo})`,
           backgroundSize: '800px auto',
@@ -66,7 +76,7 @@ export default function Login() {
       />
 
       {/* Login Card */}
-      <Card className="w-full max-w-md relative z-10 shadow-xl">
+      <Card className="w-full max-w-md relative z-10 shadow-xl my-auto">
         <CardHeader className="space-y-4 text-center pb-6">
           <div className="flex justify-center mb-4">
             <img 
