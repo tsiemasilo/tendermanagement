@@ -20,6 +20,9 @@ Preferred communication style: Simple, everyday language.
 
 ### Backend Architecture
 - **Server**: Express.js with TypeScript for API endpoints
+- **Authentication**: Session-based authentication with bcrypt password hashing
+- **Session Management**: Express-session with memorystore (development) and secure cookie configuration
+- **Authorization**: Role-based access control with admin and regular user roles
 - **Database ORM**: Drizzle ORM for type-safe database operations
 - **Validation**: Zod schemas shared between client and server for consistent data validation
 - **API Design**: RESTful endpoints with proper error handling and status codes
@@ -27,9 +30,37 @@ Preferred communication style: Simple, everyday language.
 
 ### Data Storage
 - **Database**: PostgreSQL with support for multiple providers (Neon, Supabase, PlanetScale)
-- **Schema**: Two main entities - users and tenders with proper relationships and constraints
+- **Schema**: Two main entities - users (with admin role) and tenders with proper relationships and constraints
 - **Migrations**: Drizzle Kit for database schema management and migrations
 - **Connection**: Environment-based configuration supporting both development and production environments
+
+### Authentication & Authorization
+- **Login System**: Custom username/password authentication with session management
+- **Password Security**: Bcrypt hashing with 10 salt rounds for all stored passwords
+- **Session Storage**: Server-side sessions with secure HTTP-only cookies
+- **Protected Routes**: All tender management routes require authentication
+- **Admin Panel**: Dedicated admin interface for user management (admin users only)
+- **User Roles**: Admin users can create, edit, and delete user accounts
+- **UI Components**: Login page with Alteram branding and low-opacity background logo
+
+### API Endpoints
+
+#### Authentication Endpoints
+- `POST /api/auth/login` - Authenticate user and create session
+- `POST /api/auth/logout` - Destroy user session
+- `GET /api/auth/me` - Get current authenticated user
+
+#### Tender Management Endpoints (Protected)
+- `GET /api/tenders` - List all tenders
+- `POST /api/tenders` - Create new tender
+- `PUT /api/tenders/:id` - Update tender
+- `DELETE /api/tenders/:id` - Delete tender
+
+#### Admin User Management Endpoints (Admin Only)
+- `GET /api/admin/users` - List all users
+- `POST /api/admin/users` - Create new user
+- `PUT /api/admin/users/:id` - Update user
+- `DELETE /api/admin/users/:id` - Delete user
 
 ### Deployment Architecture
 - **Production**: Netlify Functions for serverless deployment
