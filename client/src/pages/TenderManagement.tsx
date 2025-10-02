@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { format } from 'date-fns';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
+import { API_BASE_URL } from '@/lib/api';
 import AppLayout from '@/components/AppLayout';
 import TenderCalendar from '@/components/TenderCalendar';
 import TenderDetailModal from '@/components/TenderDetailModal';
@@ -22,28 +23,28 @@ export default function TenderManagement() {
 
   // Fetch tenders from API
   const { data: tenders = [], isLoading } = useQuery<Tender[]>({
-    queryKey: ['/api/tenders'],
+    queryKey: [`${API_BASE_URL}/tenders`],
   });
 
   // Create tender mutation
   const createTenderMutation = useMutation({
     mutationFn: async (data: InsertTender) => {
-      const response = await apiRequest('POST', '/api/tenders', data);
+      const response = await apiRequest('POST', `${API_BASE_URL}/tenders`, data);
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/tenders'] });
+      queryClient.invalidateQueries({ queryKey: [`${API_BASE_URL}/tenders`] });
     },
   });
 
   // Update tender mutation
   const updateTenderMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: InsertTender }) => {
-      const response = await apiRequest('PUT', `/api/tenders/${id}`, data);
+      const response = await apiRequest('PUT', `${API_BASE_URL}/tenders/${id}`, data);
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/tenders'] });
+      queryClient.invalidateQueries({ queryKey: [`${API_BASE_URL}/tenders`] });
     },
   });
 

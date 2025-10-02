@@ -22,6 +22,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/hooks/useAuth';
+import { API_BASE_URL } from '@/lib/api';
 import alteramLogo from '@assets/alteram1_1_600x197_1750838676214_1758878160686.png';
 
 interface AppLayoutProps {
@@ -95,7 +96,7 @@ export default function AppLayout({
   const handleExportData = async () => {
     try {
       // Fetch current tenders data from API
-      const response = await fetch('/api/tenders');
+      const response = await fetch(`${API_BASE_URL}/tenders`);
       const tenders = await response.json();
 
       // Convert data to Excel format

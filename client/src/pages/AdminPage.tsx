@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { apiRequest, queryClient } from '@/lib/queryClient';
+import { API_BASE_URL } from '@/lib/api';
 import { useAuth } from '@/hooks/useAuth';
 import AppLayout from '@/components/AppLayout';
 import { Button } from '@/components/ui/button';
@@ -63,7 +64,7 @@ export default function AdminPage() {
   const [deletingUser, setDeletingUser] = useState<Omit<User, 'password'> | null>(null);
 
   const { data: users = [], isLoading } = useQuery<Omit<User, 'password'>[]>({
-    queryKey: ['/api/admin/users'],
+    queryKey: [`${API_BASE_URL}/admin/users`],
   });
 
   const createForm = useForm<CreateUserFormData>({
@@ -89,11 +90,11 @@ export default function AdminPage() {
   const createUserMutation = useMutation({
     mutationFn: async (data: CreateUserFormData) => {
       const { confirmPassword, ...userData } = data;
-      const response = await apiRequest('POST', '/api/admin/users', userData);
+      const response = await apiRequest('POST', `${API_BASE_URL}/admin/users`, userData);
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      queryClient.invalidateQueries({ queryKey: [`${API_BASE_URL}/admin/users`] });
       setShowCreateDialog(false);
       createForm.reset();
       toast({
@@ -116,11 +117,11 @@ export default function AdminPage() {
       if (!userData.password) {
         delete userData.password;
       }
-      const response = await apiRequest('PUT', `/api/admin/users/${id}`, userData);
+      const response = await apiRequest('PUT', `${API_BASE_URL}/admin/users/${id}`, userData);
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      queryClient.invalidateQueries({ queryKey: [`${API_BASE_URL}/admin/users`] });
       setEditingUser(null);
       editForm.reset();
       toast({
@@ -139,11 +140,11 @@ export default function AdminPage() {
 
   const deleteUserMutation = useMutation({
     mutationFn: async (id: string) => {
-      const response = await apiRequest('DELETE', `/api/admin/users/${id}`);
+      const response = await apiRequest('DELETE', `${API_BASE_URL}/admin/users/${id}`);
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      queryClient.invalidateQueries({ queryKey: [`${API_BASE_URL}/admin/users`] });
       setDeletingUser(null);
       toast({
         title: 'Success',

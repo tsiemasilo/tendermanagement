@@ -4,6 +4,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useLocation } from 'wouter';
 import { z } from 'zod';
 import { apiRequest, queryClient } from '@/lib/queryClient';
+import { API_BASE_URL } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -32,11 +33,11 @@ export default function Login() {
 
   const loginMutation = useMutation({
     mutationFn: async (data: LoginFormData) => {
-      const response = await apiRequest('POST', '/api/auth/login', data);
+      const response = await apiRequest('POST', `${API_BASE_URL}/auth/login`, data);
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
+      queryClient.invalidateQueries({ queryKey: [`${API_BASE_URL}/auth/me`] });
       setLocation('/');
     },
     onError: (error: Error) => {
