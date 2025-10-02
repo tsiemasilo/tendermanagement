@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Plus, Calendar, List, Settings, Download, HelpCircle, Info } from 'lucide-react';
+import { Plus, Calendar, List, Settings, Download, HelpCircle, Info, LogOut, Shield } from 'lucide-react';
+import { Link } from 'wouter';
 import * as XLSX from 'xlsx';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -20,6 +21,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
+import { useAuth } from '@/hooks/useAuth';
 import alteramLogo from '@assets/alteram1_1_600x197_1750838676214_1758878160686.png';
 
 interface AppLayoutProps {
@@ -35,6 +37,7 @@ export default function AppLayout({
   currentView = 'calendar',
   onViewChange 
 }: AppLayoutProps) {
+  const { user, isAdmin, logout } = useAuth();
   const [showPreferences, setShowPreferences] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
@@ -171,32 +174,59 @@ export default function AppLayout({
             
             <div className="flex items-center gap-3">
               {/* View Toggle */}
-              <div className="flex gap-1 p-1 bg-muted rounded-md">
-                <Button
-                  variant={currentView === 'calendar' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => onViewChange?.('calendar')}
-                  data-testid="button-calendar-view"
-                >
-                  <Calendar className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant={currentView === 'list' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => onViewChange?.('list')}
-                  data-testid="button-list-view"
-                >
-                  <List className="h-4 w-4" />
-                </Button>
-              </div>
+              {onViewChange && (
+                <div className="flex gap-1 p-1 bg-muted rounded-md">
+                  <Button
+                    variant={currentView === 'calendar' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => onViewChange?.('calendar')}
+                    data-testid="button-calendar-view"
+                  >
+                    <Calendar className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant={currentView === 'list' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => onViewChange?.('list')}
+                    data-testid="button-list-view"
+                  >
+                    <List className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+              
+              {/* Admin Link */}
+              {isAdmin && (
+                <Link href="/admin">
+                  <Button 
+                    variant="outline"
+                    data-testid="button-admin-link"
+                  >
+                    <Shield className="h-4 w-4 mr-2" />
+                    Admin
+                  </Button>
+                </Link>
+              )}
               
               {/* Action Buttons */}
+              {onNewTender && (
+                <Button 
+                  onClick={onNewTender}
+                  data-testid="button-new-tender"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  New Tender
+                </Button>
+              )}
+              
+              {/* Logout Button */}
               <Button 
-                onClick={onNewTender}
-                data-testid="button-new-tender"
+                variant="outline"
+                onClick={logout}
+                data-testid="button-logout-header"
               >
-                <Plus className="h-4 w-4 mr-2" />
-                New Tender
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
               </Button>
               
               <DropdownMenu>
