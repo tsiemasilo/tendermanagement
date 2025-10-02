@@ -145,11 +145,11 @@ export default function AppLayout({
     <div className="min-h-screen bg-background relative">
       {/* Background Logo */}
       <div 
-        className="fixed inset-0 bg-no-repeat bg-center opacity-5 pointer-events-none"
+        className="fixed inset-0 bg-no-repeat opacity-5 pointer-events-none"
         style={{
           backgroundImage: `url(${alteramLogo})`,
           backgroundSize: '300px auto',
-          backgroundPosition: 'bottom right',
+          backgroundPosition: 'calc(100% - 2rem) calc(100% - 8rem)',
         }}
       />
       
