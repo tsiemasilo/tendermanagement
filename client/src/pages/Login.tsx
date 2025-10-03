@@ -76,7 +76,7 @@ export default function Login() {
       />
 
       {/* Login Card */}
-      <Card className="w-full max-w-md relative z-10 shadow-xl my-auto">
+      <Card className="w-full max-w-xl relative z-10 shadow-xl my-auto">
         <CardHeader className="space-y-4 text-center pb-6">
           <div className="flex justify-center mb-4">
             <img 

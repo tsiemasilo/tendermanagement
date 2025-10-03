@@ -236,7 +236,7 @@ export default function AppLayout({
                     <Settings className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
+                <DropdownMenuContent align="end" side="bottom" sideOffset={5} alignOffset={0}>
                   <DropdownMenuItem 
                     onClick={() => setShowPreferences(true)}
                     data-testid="menu-item-preferences"
