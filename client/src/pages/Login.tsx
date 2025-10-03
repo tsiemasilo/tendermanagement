@@ -46,8 +46,8 @@ export default function Login() {
       const response = await apiRequest('POST', `${API_BASE_URL}/auth/login`, data);
       return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`${API_BASE_URL}/auth/me`] });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: [`${API_BASE_URL}/auth/me`] });
       setLocation('/');
     },
     onError: (error: Error) => {
