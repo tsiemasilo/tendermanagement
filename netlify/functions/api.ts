@@ -4,12 +4,17 @@ import { drizzle } from "drizzle-orm/neon-http";
 import { neon } from "@neondatabase/serverless";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
-import { insertTenderSchema, insertUserSchema, users, tenders, type User, type InsertUser, type Tender, type InsertTender } from "../../shared/schema";
-import { randomUUID } from "crypto";
+import session from "express-session";
+import bcrypt from "bcrypt";
+import { insertTenderSchema, insertUserSchema, loginSchema, users, tenders, type User, type InsertUser, type Tender, type InsertTender } from "../../shared/schema";
 
-// Database connection for Netlify serverless functions
+declare module "express-session" {
+  interface SessionData {
+    userId?: string;
+  }
+}
+
 const getDatabaseUrl = () => {
-  // For Netlify, always use NETLIFY_DATABASE_URL, fallback to DATABASE_URL
   const databaseUrl = process.env.NETLIFY_DATABASE_URL || process.env.DATABASE_URL;
   
   if (!databaseUrl) {
@@ -22,9 +27,9 @@ const getDatabaseUrl = () => {
 const sql = neon(getDatabaseUrl());
 const db = drizzle(sql);
 
-// Storage implementation for serverless functions
+const SALT_ROUNDS = 10;
+
 class NetlifyStorage {
-  // User operations
   async getUser(id: string): Promise<User | undefined> {
     const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
     return result[0];
@@ -35,12 +40,32 @@ class NetlifyStorage {
     return result[0];
   }
 
+  async getAllUsers(): Promise<User[]> {
+    return db.select().from(users);
+  }
+
   async createUser(insertUser: InsertUser): Promise<User> {
     const result = await db.insert(users).values(insertUser).returning();
     return result[0];
   }
 
-  // Tender operations
+  async updateUser(id: string, updateData: Partial<InsertUser>): Promise<User> {
+    const result = await db.update(users)
+      .set(updateData)
+      .where(eq(users.id, id))
+      .returning();
+    
+    if (!result[0]) {
+      throw new Error(`User with id ${id} not found`);
+    }
+    
+    return result[0];
+  }
+
+  async deleteUser(id: string): Promise<void> {
+    await db.delete(users).where(eq(users.id, id));
+  }
+
   async getTender(id: string): Promise<Tender | undefined> {
     const result = await db.select().from(tenders).where(eq(tenders.id, id)).limit(1);
     return result[0];
@@ -75,18 +100,60 @@ class NetlifyStorage {
 
 const storage = new NetlifyStorage();
 
+function requireAuth(req: Request, res: Response, next: NextFunction) {
+  if (!req.session.userId) {
+    return res.status(401).json({ message: "Authentication required" });
+  }
+  next();
+}
+
+async function requireAdmin(req: Request, res: Response, next: NextFunction) {
+  if (!req.session.userId) {
+    return res.status(401).json({ message: "Authentication required" });
+  }
+
+  try {
+    const user = await storage.getUser(req.session.userId);
+    if (!user || !user.isAdmin) {
+      return res.status(403).json({ message: "Admin access required" });
+    }
+    next();
+  } catch (error) {
+    console.error("Error checking admin status:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+function sanitizeUser(user: User): Omit<User, "password"> {
+  const { password, ...sanitized } = user;
+  return sanitized;
+}
+
 const app = express();
 const router = express.Router();
 
-// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// CORS middleware for serverless environment
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || "alteram-tender-management-secret-key-change-in-production",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      maxAge: 1000 * 60 * 60 * 24 * 7,
+    },
+  })
+);
+
 app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Origin", process.env.NODE_ENV === "production" ? "https://alt-tendermanagement.netlify.app" : "*");
   res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, Content-Length, X-Requested-With");
+  res.header("Access-Control-Allow-Credentials", "true");
   
   if (req.method === "OPTIONS") {
     res.sendStatus(200);
@@ -95,7 +162,6 @@ app.use((req, res, next) => {
   }
 });
 
-// Logging middleware for API requests
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
@@ -124,62 +190,132 @@ app.use((req, res, next) => {
   next();
 });
 
-// API Routes
-router.get("/api/users/:id", async (req: Request, res: Response) => {
+router.post("/api/auth/login", async (req, res) => {
   try {
-    const { id } = req.params;
-    const user = await storage.getUser(id);
+    const { username, password } = loginSchema.parse(req.body);
     
+    const user = await storage.getUserByUsername(username);
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(401).json({ message: "Invalid username or password" });
     }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: "Invalid username or password" });
+    }
+
+    req.session.userId = user.id;
     
-    res.json(user);
+    res.json(sanitizeUser(user));
   } catch (error) {
-    console.error("Error getting user:", error);
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ message: "Validation error", errors: error.errors });
+    }
+    console.error("Error during login:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });
 
-router.get("/api/users", async (req: Request, res: Response) => {
+router.post("/api/auth/logout", (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.error("Error destroying session:", err);
+      return res.status(500).json({ message: "Failed to logout" });
+    }
+    res.json({ message: "Logged out successfully" });
+  });
+});
+
+router.get("/api/auth/me", async (req, res) => {
+  if (!req.session.userId) {
+    return res.status(401).json({ message: "Not authenticated" });
+  }
+
   try {
-    // For demo purposes, return empty array as MemStorage doesn't have a getAll method
-    res.json([]);
+    const user = await storage.getUser(req.session.userId);
+    if (!user) {
+      return res.status(401).json({ message: "User not found" });
+    }
+
+    res.json(sanitizeUser(user));
+  } catch (error) {
+    console.error("Error getting current user:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+router.get("/api/admin/users", requireAdmin, async (req, res) => {
+  try {
+    const users = await storage.getAllUsers();
+    res.json(users.map(sanitizeUser));
   } catch (error) {
     console.error("Error getting users:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });
 
-router.post("/api/users", async (req: Request, res: Response) => {
+router.post("/api/admin/users", requireAdmin, async (req, res) => {
   try {
-    const userData = req.body;
-    const user = await storage.createUser(userData);
-    res.status(201).json(user);
+    const userData = insertUserSchema.parse(req.body);
+    
+    const existingUser = await storage.getUserByUsername(userData.username);
+    if (existingUser) {
+      return res.status(400).json({ message: "Username already exists" });
+    }
+
+    const hashedPassword = await bcrypt.hash(userData.password, SALT_ROUNDS);
+    const user = await storage.createUser({
+      ...userData,
+      password: hashedPassword,
+    });
+    
+    res.status(201).json(sanitizeUser(user));
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ message: "Validation error", errors: error.errors });
+    }
     console.error("Error creating user:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });
 
-router.get("/api/users/username/:username", async (req: Request, res: Response) => {
+router.put("/api/admin/users/:id", requireAdmin, async (req, res) => {
   try {
-    const { username } = req.params;
-    const user = await storage.getUserByUsername(username);
-    
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
+    const { id } = req.params;
+    const updateData = insertUserSchema.partial().parse(req.body);
+
+    if (updateData.password) {
+      updateData.password = await bcrypt.hash(updateData.password, SALT_ROUNDS);
     }
-    
-    res.json(user);
+
+    const user = await storage.updateUser(id, updateData);
+    res.json(sanitizeUser(user));
   } catch (error) {
-    console.error("Error getting user by username:", error);
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ message: "Validation error", errors: error.errors });
+    }
+    console.error("Error updating user:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });
 
-// Tender routes
-router.get("/api/tenders", async (req: Request, res: Response) => {
+router.delete("/api/admin/users/:id", requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    if (req.session.userId === id) {
+      return res.status(400).json({ message: "Cannot delete your own account" });
+    }
+
+    await storage.deleteUser(id);
+    res.json({ message: "User deleted successfully", id });
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+router.get("/api/tenders", requireAuth, async (req, res) => {
   try {
     const allTenders = await storage.getAllTenders();
     res.json(allTenders);
@@ -189,7 +325,7 @@ router.get("/api/tenders", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/api/tenders/:id", async (req: Request, res: Response) => {
+router.get("/api/tenders/:id", requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const tender = await storage.getTender(id);
@@ -205,7 +341,7 @@ router.get("/api/tenders/:id", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/api/tenders", async (req: Request, res: Response) => {
+router.post("/api/tenders", requireAuth, async (req, res) => {
   try {
     const tenderData = insertTenderSchema.parse(req.body);
     const tender = await storage.createTender(tenderData);
@@ -219,7 +355,7 @@ router.post("/api/tenders", async (req: Request, res: Response) => {
   }
 });
 
-router.put("/api/tenders/:id", async (req: Request, res: Response) => {
+router.put("/api/tenders/:id", requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const tenderData = insertTenderSchema.parse(req.body);
@@ -234,7 +370,7 @@ router.put("/api/tenders/:id", async (req: Request, res: Response) => {
   }
 });
 
-router.delete("/api/tenders/:id", async (req: Request, res: Response) => {
+router.delete("/api/tenders/:id", requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
     await storage.deleteTender(id);
@@ -245,15 +381,12 @@ router.delete("/api/tenders/:id", async (req: Request, res: Response) => {
   }
 });
 
-// Health check endpoint
-router.get("/api/health", (req: Request, res: Response) => {
+router.get("/api/health", (req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
-// Mount the router at root so /api routes work correctly
 app.use("/", router);
 
-// Error handling middleware
 app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   console.error("Unhandled error:", err);
   const status = err.status || err.statusCode || 500;
@@ -261,5 +394,4 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   res.status(status).json({ message });
 });
 
-// Export the serverless handler
 export const handler = serverless(app);
