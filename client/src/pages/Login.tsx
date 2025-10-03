@@ -70,8 +70,10 @@ export default function Login() {
         className="fixed inset-0 bg-no-repeat bg-center opacity-[0.03] pointer-events-none z-0"
         style={{
           backgroundImage: `url(${alteramLogo})`,
-          backgroundSize: '800px auto',
+          backgroundSize: 'contain',
           backgroundPosition: 'center',
+          width: '100%',
+          height: '100%',
         }}
       />
 
