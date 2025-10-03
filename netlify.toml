@@ -4,9 +4,10 @@
   command = "npm install --include=dev && npm run build"
 
 [functions]
-  external_node_modules = ["express", "drizzle-orm", "@neondatabase/serverless", "tsx"]
+  external_node_modules = ["express", "drizzle-orm", "@neondatabase/serverless", "bcrypt", "express-session"]
   # Include environment variables for functions
   included_files = ["shared/**"]
+  node_bundler = "esbuild"
 
 [context.production.environment]
   NODE_ENV = "production"
