@@ -219,7 +219,7 @@
       height: 133.33%;
     }
     
-    /* Portal root should not be scaled */
+    /* Portal root with same scale as main content */
     #portal-root {
       position: fixed;
       top: 0;
@@ -228,17 +228,13 @@
       height: 100vh;
       pointer-events: none;
       z-index: 9999;
+      /* Apply the same scale transform to match the page */
+      transform: scale(0.75);
+      transform-origin: top left;
     }
     
     #portal-root > * {
       pointer-events: auto;
-    }
-    
-    /* Scale portal content to match page scale */
-    #portal-root [data-radix-dropdown-menu-content],
-    #portal-root [data-radix-popover-content] {
-      transform: scale(0.75) !important;
-      transform-origin: top left !important;
     }
   }
   
