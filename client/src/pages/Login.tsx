@@ -79,22 +79,22 @@ export default function Login() {
 
       {/* Login Card */}
       <Card className="w-full max-w-xl relative z-10 shadow-xl my-auto">
-        <CardHeader className="space-y-4 text-center pb-6">
-          <div className="flex justify-center mb-4">
+        <CardHeader className="space-y-6 text-center pb-8 pt-10">
+          <div className="flex justify-center mb-6">
             <img 
               src={alteramLogo} 
               alt="Alteram" 
-              className="h-16 w-auto"
+              className="h-20 w-auto"
             />
           </div>
-          <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-3xl font-bold">Welcome Back</CardTitle>
+          <CardDescription className="text-base">
             Sign in to access the Alteram CV Management System
           </CardDescription>
         </CardHeader>
-        <CardContent className="pb-8">
+        <CardContent className="pb-12 px-8">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               <FormField
                 control={form.control}
                 name="username"
