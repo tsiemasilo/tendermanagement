@@ -218,6 +218,28 @@
       width: 133.33%; /* 100% / 0.75 to maintain full viewport coverage */
       height: 133.33%;
     }
+    
+    /* Portal root should not be scaled */
+    #portal-root {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 9999;
+    }
+    
+    #portal-root > * {
+      pointer-events: auto;
+    }
+    
+    /* Scale portal content to match page scale */
+    #portal-root [data-radix-dropdown-menu-content],
+    #portal-root [data-radix-popover-content] {
+      transform: scale(0.75) !important;
+      transform-origin: top left !important;
+    }
   }
   
   /* Keep normal scaling on mobile devices */
@@ -233,13 +255,6 @@
     @apply font-sans antialiased bg-background text-foreground;
   }
 
-  /* Fix dropdown/popover positioning with scaled html element */
-  @media (min-width: 768px) {
-    [data-radix-popper-content-wrapper] {
-      transform: scale(1.3333) !important;
-      transform-origin: top left !important;
-    }
-  }
 }
 
 /**
