@@ -197,14 +197,6 @@ export default function AdminPage() {
           </div>
           <div className="flex gap-2">
             <Button
-              variant="outline"
-              onClick={logout}
-              data-testid="button-logout"
-            >
-              <LogOut className="h-4 w-4 mr-2" />
-              Logout
-            </Button>
-            <Button
               onClick={() => setShowCreateDialog(true)}
               data-testid="button-create-user"
             >
